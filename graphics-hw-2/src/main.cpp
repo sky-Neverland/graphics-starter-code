@@ -15,7 +15,11 @@ int main() {
     Scene scene;
 
     Plane plane;
+    Sphere sphere;
+    vec4 v(1, 0, 2, 0);
+    sphere.translate(v);
     scene.items.push_back(&plane);
+    scene.items.push_back(&sphere);
 
     Camera cam(vec4(-2, 0, 1, 1), 0, 0, nx, ny, .01, 90, 1);
     scene.cameras.push_back(&cam);
