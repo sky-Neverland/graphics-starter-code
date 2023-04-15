@@ -13,6 +13,8 @@ int main() {
     int ny = 400;
 
     Scene scene;
+    scene.ambientLight = .5;
+    scene.backgroundColor = white;
 
     Plane plane;
     groundGrid planeMat;
@@ -24,7 +26,7 @@ int main() {
     sphereMat.c = red;
     sphere.setMaterial(sphereMat);
     
-    vec4 translate_vec(0,0,1,0);
+    vec4 translate_vec(0,0,.5,0);
     sphere.translate(translate_vec);
 
     vec4 scale_vec(.5,.5,.5,0);

@@ -1,5 +1,7 @@
 #include "rayTracer.hpp"
 
+const int numSamples = 1024;
+const int maxDepth = 20;
 Image RayTracer::takePicture(Scene &scene, int camIndex)
 {
     Image output;
@@ -20,16 +22,24 @@ Image RayTracer::takePicture(Scene &scene, int camIndex)
     {
         for (int i = 0; i < (cam.width); i++)
         {
-            ray eyeRay = cam.getEyeRay(i + .5, j + .5);
-
-            Hit hit;
-            hit = this->traceRay(scene, eyeRay, hit, 0);
-
             Color c = output.getPixel(i, j);
-            c.r += hit.color.r;
-            c.g += hit.color.g;
-            c.b += hit.color.b;
+            for (int k = 0; k < numSamples; k++)
+            {
+                float u = static_cast<float>(rand()) / RAND_MAX;
+                float v = static_cast<float>(rand()) / RAND_MAX;
 
+                ray eyeRay = cam.getEyeRay(i + u, j + v);
+
+                Hit hit;
+                hit = this->traceRay(scene, eyeRay, hit, 0);
+
+                c.r += hit.color.r;
+                c.g += hit.color.g;
+                c.b += hit.color.b;
+            }
+            c.r = sqrt(c.r/numSamples);
+            c.g = sqrt(c.g/numSamples); 
+            c.b = sqrt(c.b/numSamples);
             output.setPixel(i, j, c);
         }
     }
@@ -63,6 +73,17 @@ void RayTracer::findShade(Scene &scene, Hit &hit, int depth)
     // hit
     else
     {
-        hit.color = hit.material->getColor(hit.modelSpacePos);
+        Color color = hit.material->getColor(hit.modelSpacePos);
+        ray scatteredRay = hit.material->scatter(hit.inRay, hit.pos, hit.normal);
+        if (depth > maxDepth)
+            return;
+        Hit scatteredHit;
+        scatteredHit = this->traceRay(scene, scatteredRay, scatteredHit, depth + 1);
+        if (scatteredHit.brightness > 0)
+        {
+            hit.color.r += color.r * scatteredHit.color.r * scatteredHit.brightness;
+            hit.color.g += color.g * scatteredHit.color.g * scatteredHit.brightness;
+            hit.color.b += color.b * scatteredHit.color.b * scatteredHit.brightness;
+        }
     }
 }
